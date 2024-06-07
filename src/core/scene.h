@@ -11,7 +11,8 @@ protected:
     Shader* shader;
     std::vector<Model*> models;
     TGAImage framebuffer;
-    TGAImage zbuffer;
+    int w, h;
+    std::vector<float> zbuffer;
     Camera camera;
     Vec3f light_dir;
 public:

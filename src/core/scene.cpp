@@ -1,7 +1,7 @@
 #include "./scene.h"
 
 Scene::Scene(int width, int height, const std::string& scene_name)
-    : camera(Vec3f(0,0,0), std::sqrt(10), 0.7f, 0.6f, 4.f/3.f)
+    :  w(width), h(height), zbuffer(width*height), camera(Vec3f(0,0,0), std::sqrt(10), 0.7f, 0.6f, 4.f/3.f)
 {
     // 加载模型
     load_scene(scene_name);
@@ -20,7 +20,6 @@ Scene::Scene(int width, int height, const std::string& scene_name)
     shader->payload.uniform_light_dir = light_dir;
     // 创建缓冲
     framebuffer = TGAImage(width, height, TGAImage::RGBA);
-    zbuffer = TGAImage(width, height, TGAImage::GRAYSCALE);
 }
 
 Scene::~Scene() {
@@ -39,6 +38,8 @@ void Scene::load_scene(const std::string& scene_name) {
         models.push_back(new Model(".\\obj\\qiyana\\qiyanabody.obj"));
         models.push_back(new Model(".\\obj\\qiyana\\qiyanaface.obj"));
         models.push_back(new Model(".\\obj\\qiyana\\qiyanahair.obj"));
+    } else if (scene_name == "floor") {
+        models.push_back(new Model(".\\obj\\floor.obj"));
     }
     else {
         std::cerr << "No such scene!";
@@ -62,7 +63,7 @@ void Scene::rasterize() {
 
 void Scene::clear_framebuffer() {
     framebuffer.clear();
-    zbuffer.clear();
+    fill(zbuffer.begin(), zbuffer.end(), 0.f);
 }
 
 

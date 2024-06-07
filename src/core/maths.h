@@ -1,8 +1,9 @@
 #ifndef MATHS_H
 #define MATHS_H
-#include <Eigen/Eigen>
+
 #include <cmath>
 #include <vector>
+#include <array>
 #include <cassert>
 #include <iostream>
 
@@ -221,4 +222,11 @@ Mat4f lookat(Vec3f pos, Vec3f focal, Vec3f up);
 Mat4f projection(float fov, float aspect, float znear, float zfar);
 Mat4f projection(float coef);
 }
+
+template<typename T>
+inline T perspective_interpolation(std::array<T,3>& params, Vec3f bary, Vec3f zs, float zt) {
+    return (params[0]*bary[0]/zs[0] + params[1]*bary[1]/zs[1] + params[2]*bary[2]/zs[2])*zt;
+}
+
+
 #endif

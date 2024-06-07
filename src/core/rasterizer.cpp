@@ -57,7 +57,7 @@ static inline Vec3f barycentric(Vec2f A, Vec2f B, Vec2f C, Vec2f P) {
 }
 
 
-void triangle(TGAImage& framebuffer, TGAImage& zbuffer, Shader* shader, const std::array<Vec4f, 3>& t) {
+void triangle(TGAImage& framebuffer, std::vector<float>& zbuffer, Shader* shader, const std::array<Vec4f, 3>& t) {
 
     // 创建包围盒
     Vec2f bboxmin( std::numeric_limits<float>::max(),  std::numeric_limits<float>::max());
@@ -79,21 +79,18 @@ void triangle(TGAImage& framebuffer, TGAImage& zbuffer, Shader* shader, const st
             // 使用重心坐标计算 zbuffer
             float z = t[0][2]*bary.x + t[1][2]*bary.y + t[2][2]*bary.z;
             float w = t[0][3]*bary.x + t[1][3]*bary.y + t[2][3]*bary.z;
-            int frag_depth = std::max(0, std::min(255, int(z/w+.5)));
+            float depth = z/w;
 
-            if (zbuffer.get(x,y)[0] >= frag_depth) continue;
+            if (zbuffer[y*framebuffer.get_width()+x] > depth) continue;
 
-            TGAColor color = WHITE;
-            bool discard = shader->fragment(bary, color);
-            if (!discard) {
-                zbuffer.set(x,y, TGAColor(frag_depth));
-                framebuffer.set(x,y,color);
-            }
+            TGAColor color = shader->fragment(bary);
+            zbuffer[y*framebuffer.get_width()+x] = depth;
+            framebuffer.set(x,framebuffer.get_height()-y-1,color);
         }
     }
 }
 
-void triangle(TGAImage& framebuffer, TGAImage& zbuffer, Shader* shader, int nface) {
+void triangle(TGAImage& framebuffer, std::vector<float>& zbuffer, Shader* shader, int nface) {
     std::array<Vec4f, 3> t;
     for (int i = 0; i < 3; i++) {
         t[i] = shader->vertex(nface, i);

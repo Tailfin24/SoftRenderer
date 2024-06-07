@@ -56,6 +56,7 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         src/core/camera.h
         src/core/camera.cpp
         src/shader/shader.h
+        src/shader/gouraud_shader.cpp
 
     )
 

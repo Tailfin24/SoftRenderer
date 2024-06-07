@@ -11,5 +11,5 @@
 
 
 void line(TGAImage& framebuffer,int x0, int y0, int x1, int y1,TGAColor color);
-void triangle(TGAImage& framebuffer, TGAImage& zbuffer, Shader* shader, const std::array<Vec4f, 3>& t);
-void triangle(TGAImage& frambuffer, TGAImage& zbuffer, Shader* shader, int nface);
+void triangle(TGAImage& framebuffer, std::vector<float>& zbuffer, Shader* shader, const std::array<Vec4f, 3>& t);
+void triangle(TGAImage& frambuffer, std::vector<float>& zbuffer, Shader* shader, int nface);
