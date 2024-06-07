@@ -10,7 +10,7 @@ Camera::Camera(const Vec3f &e, const Vec3f &c, const Vec3f &up, float aspect)
 }
 
 Camera::Camera(const Vec3f& center, float radius, float theta, float phi, float aspect)
-    : center(center), radius(radius), theta(theta), phi(phi), aspect(aspect) {
+    : center(center), aspect(aspect), radius(radius), theta(theta), phi(phi) {
     update_ecu();
 }
 
