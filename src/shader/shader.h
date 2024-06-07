@@ -38,18 +38,16 @@ public:
 
     virtual bool fragment(Vec3f bary, TGAColor& color) {
         Vec2f uv = payload.varying_uv * bary;
-        // Vec3f normal = proj<3>(payload.uniform_mit*embed<4>(payload.model->normal(uv))).normalize();
-        // Vec3f light = proj<3>(payload.uniform_mvp * embed<4>(payload.uniform_light_dir)).normalize();
-        // // Phong Model
-        // float alpha = payload.model->specular(uv);
-        // float alpha = 1.0;
-        // Vec3f reflect = (normal*(normal*light*2.f)-light).normalize();
-        // float spec = std::pow(std::max(reflect.z,0.0f), alpha);
-        // float diff = std::max(0.f, normal*light);
-        // float ambient = 0.1;
-        // float intensity = .6*spec + diff + ambient;
-        // color = payload.model->diffuse(uv);
-        float intensity = 1.f;
+        Vec3f normal = proj<3>(payload.uniform_mit*embed<4>(payload.model->normal(uv))).normalize();
+        Vec3f light = proj<3>(payload.uniform_mvp * embed<4>(payload.uniform_light_dir)).normalize();
+        // Phong Model
+        float alpha = payload.model->specular(uv);
+        Vec3f reflect = (normal*(normal*light*2.f)-light).normalize();
+        float spec = std::pow(std::max(reflect.z,0.0f), alpha);
+        float diff = std::max(0.f, normal*light);
+        float ambient = 0.1;
+        float intensity = .6*spec + diff + ambient;
+        color = payload.model->diffuse(uv);
         for (int i = 0; i < 3; i++) {
             color[i] = std::min<float>(255, color[i] * intensity);
         }

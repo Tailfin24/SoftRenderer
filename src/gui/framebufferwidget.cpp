@@ -9,7 +9,7 @@ FrameBufferWidget::FrameBufferWidget(int width, int height, const std::string& s
     // rasterization
     m_timer = new QTimer();
     connect(m_timer, &QTimer::timeout, this, FrameBufferWidget::updateFrameBuffer);
-    m_timer->start(16);
+    m_timer->start(1);
 
     // fps initialization
     m_last_calc_time = QTime::currentTime().msecsSinceStartOfDay();
@@ -26,10 +26,7 @@ FrameBufferWidget::~FrameBufferWidget() {
 }
 
 void FrameBufferWidget::updateFrameBuffer() {
-    m_scene->rasterize();
-    m_fb = m_scene->get_framebuffer();
     update();
-    calcFPS();
 }
 
 void FrameBufferWidget::rotateHorizontal() {
@@ -44,11 +41,8 @@ void FrameBufferWidget::rotateHorizontal() {
 
 void FrameBufferWidget::paintEvent(QPaintEvent *event) {
     Q_UNUSED(event);
-
-    if (m_fb.get_width() == 0 || m_fb.get_height() == 0) {
-        return;
-    }
-
+    m_scene->rasterize();
+    m_fb = m_scene->get_framebuffer();
     QImage image(m_fb.buffer(), m_fb.get_width(), m_fb.get_height(), QImage::Format_ARGB32);
     QPainter painter(this);
 
