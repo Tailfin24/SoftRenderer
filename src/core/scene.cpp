@@ -32,6 +32,8 @@ Scene::~Scene() {
 void Scene::load_scene(const std::string& scene_name) {
     if (scene_name == "african_head") {
         models.push_back(new Model(".\\obj\\african_head\\african_head.obj"));
+        models.push_back(new Model(".\\obj\\african_head\\african_head_eye_inner.obj"));
+        models.push_back(new Model(".\\obj\\african_head\\african_head_eye_outer.obj"));
     } else if (scene_name == "diablo3") {
         models.push_back(new Model(".\\obj\\diablo3_pose\\diablo3_pose.obj"));
     } else if (scene_name == "qiyana"){

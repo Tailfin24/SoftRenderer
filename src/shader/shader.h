@@ -15,6 +15,9 @@ struct Payload {
     Vec3f uniform_light_dir;
 
     // Vertex
+    std::array<Vec3f, 3> varying_worldcoord;
+    std::array<Vec4f, 3> varying_clipcoord;
+    std::array<Vec3f, 3> varying_normal;
     std::array<Vec2f, 3> varying_uv;
 };
 

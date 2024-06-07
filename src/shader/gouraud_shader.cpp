@@ -2,16 +2,16 @@
 
 Vec4f GouraudShader::vertex(int iface, int nthvert) {
     payload.varying_uv[nthvert] = payload.model->uv(iface, nthvert);
-    Vec4f gl_vertex = embed<4>(payload.model->vert(iface, nthvert));
-    gl_vertex = payload.uniform_viewport * payload.uniform_mvp * gl_vertex;
-    return gl_vertex;
+    payload.varying_worldcoord[nthvert] = payload.model->vert(iface, nthvert);
+    payload.varying_clipcoord[nthvert] = payload.uniform_viewport * payload.uniform_mvp * embed<4>(payload.varying_worldcoord[nthvert]);
+    return payload.varying_clipcoord[nthvert];
 }
 
 TGAColor GouraudShader::fragment(Vec3f bary) {
-    Vec2f uv(0.f, 0.f);
-    for (int i = 0; i < 3; i++) {
-        uv = uv + payload.varying_uv[i] * bary[i];
-    }
+    std::array<Vec4f, 3>& clipcoord = payload.varying_clipcoord;
+    Vec3f zs(clipcoord[0][3], clipcoord[1][3],clipcoord[2][3]);
+    float zt = 1.f/(bary[0]/zs[0] + bary[1]/zs[1] + bary[2]/zs[2]);
+    Vec2f uv = perspective_interpolation(payload.varying_uv, bary, zs, zt);
 
     Vec3f normal = proj<3>(payload.uniform_mit*embed<4>(payload.model->normal(uv))).normalize();
     Vec3f light = proj<3>(payload.uniform_mvp * embed<4>(payload.uniform_light_dir)).normalize();
