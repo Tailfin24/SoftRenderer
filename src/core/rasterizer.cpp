@@ -72,6 +72,7 @@ void triangle(TGAImage& framebuffer, std::vector<float>& zbuffer, Shader* shader
     // 渲染
     for (int x = bboxmin.x; x <= bboxmax.x; x++) {
         for (int y = bboxmin.y; y <= bboxmax.y; y++) {
+            if (x <= 0 || y <= 0 || x > framebuffer.get_width() || y > framebuffer.get_height()) continue;
             Vec3f bary = barycentric(proj<2>(t[0]/t[0][3]), proj<2>(t[1]/t[1][3]), proj<2>(t[2]/t[2][3]), Vec2f(x,y));
             // 使用重心坐标判断是否在三角形内
             if (bary.x < 0 || bary.y < 0 || bary.z < 0) continue;
@@ -79,7 +80,7 @@ void triangle(TGAImage& framebuffer, std::vector<float>& zbuffer, Shader* shader
             // 使用重心坐标计算 zbuffer
             float z = t[0][2]*bary.x + t[1][2]*bary.y + t[2][2]*bary.z;
             float w = t[0][3]*bary.x + t[1][3]*bary.y + t[2][3]*bary.z;
-            float depth = z/w;
+            float depth = std::max(0.f, z/w);
 
             if (zbuffer[y*framebuffer.get_width()+x] > depth) continue;
 

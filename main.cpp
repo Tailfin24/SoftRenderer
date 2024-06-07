@@ -10,7 +10,7 @@ int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
 
-    MainWindow w(WIDTH, HEIGHT, "african_head");
+    MainWindow w(WIDTH, HEIGHT, "floor");
 
     w.findChild<FrameBufferWidget*>()->updateFrameBuffer();
     w.show();

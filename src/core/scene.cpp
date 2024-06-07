@@ -63,7 +63,7 @@ void Scene::rasterize() {
 
 void Scene::clear_framebuffer() {
     framebuffer.clear();
-    fill(zbuffer.begin(), zbuffer.end(), 0.f);
+    std::fill(zbuffer.begin(), zbuffer.end(), 0.f);
 }
 
 
