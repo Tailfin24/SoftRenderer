@@ -1,2 +1,2 @@
-## SoftRenderer
+# SoftRenderer
 ---
