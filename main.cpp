@@ -1,5 +1,4 @@
-#include "src/gui/mainwindow.h"
-#include "src/core/scene.h"
+#include "./src/gui/mainwindow.h"
 #include <QApplication>
 
 const int WIDTH = 600;
@@ -7,12 +6,16 @@ const int HEIGHT = 600;
 
 int main(int argc, char *argv[])
 {
-    QApplication a(argc, argv);
+    QApplication app(argc, argv);
+    QFile qss("./qss/MaterialDark.qss");
+    qss.open(QFile::ReadOnly);
+    app.setStyleSheet(qss.readAll());
+    qss.close();
 
-    MainWindow w(WIDTH, HEIGHT, "african_head");
+    MainWindow w(WIDTH, HEIGHT);
 
     w.findChild<FrameBufferWidget*>()->updateFrameBuffer();
     w.show();
 
-    return a.exec();
+    return app.exec();
 }

@@ -49,14 +49,13 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         src/core/scene.h
         src/core/tgaimage.cpp
         src/core/tgaimage.h
-        src/gui/framebufferwidget.cpp
-        src/gui/framebufferwidget.h
-        src/gui/mainwindow.cpp
-        src/gui/mainwindow.h
         src/core/camera.h
         src/core/camera.cpp
         src/shader/shader.h
-        src/shader/gouraud_shader.cpp
+        src/shader/phong_shader.cpp
+        src/gui/framebufferwidget.cpp src/gui/framebufferwidget.h src/gui/mainwindow.cpp src/gui/mainwindow.h
+        src/gui/lightcontrolwidget.h src/gui/lightcontrolwidget.cpp
+
 
     )
 
