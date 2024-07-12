@@ -39,9 +39,9 @@ Model::Model(const char *filename) : verts_(), faces_(), norms_(), uv_(), diffus
         }
     }
     std::cerr << "# v# " << verts_.size() << " f# "  << faces_.size() << " vt# " << uv_.size() << " vn# " << norms_.size() << std::endl;
-    load_texture(filename, "_diffuse.tga", diffusemap_);
-    load_texture(filename, "_nm.tga",      normalmap_);
-    load_texture(filename, "_spec.tga",    specularmap_);
+    // diffusemap_loaded = load_texture(filename, "_diffuse.tga", diffusemap_);
+    // normalmap_loaded = load_texture(filename, "_nm.tga",      normalmap_);
+    // specularmap_loaded = load_texture(filename, "_spec.tga",    specularmap_);
 }
 
 Model::~Model() {}
@@ -68,14 +68,11 @@ Vec3f Model::vert(int iface, int nthvert) {
     return verts_[faces_[iface][nthvert][0]];
 }
 
-void Model::load_texture(std::string filename, const char *suffix, TGAImage &img) {
-    std::string texfile(filename);
-    size_t dot = texfile.find_last_of(".");
-    if (dot!=std::string::npos) {
-        texfile = texfile.substr(0,dot) + std::string(suffix);
-        std::cerr << "texture file " << texfile << " loading " << (img.read_tga_file(texfile.c_str()) ? "ok" : "failed") << std::endl;
-        img.flip_vertically();
-    }
+bool Model::load_texture(const std::string& filename, TGAImage &img) {
+    bool loaded_success = img.read_tga_file(filename.c_str());
+    std::cerr << "texture file " << filename << " loading " << (loaded_success ? "ok" : "failed") << std::endl;
+    img.flip_vertically();
+    return loaded_success;
 }
 
 TGAColor Model::diffuse(Vec2f uvf) {
@@ -104,4 +101,34 @@ float Model::specular(Vec2f uvf) {
 Vec3f Model::normal(int iface, int nthvert) {
     int idx = faces_[iface][nthvert][2];
     return norms_[idx].normalize();
+}
+
+
+bool Model::load_diffusemap(const std::string& filename) {
+    diffusemap_loaded = load_texture(filename, diffusemap_);
+    return diffusemap_loaded;
+}
+
+bool Model::load_normalmap(const std::string& filename) {
+    normalmap_loaded = load_texture(filename, normalmap_);
+    return normalmap_loaded;
+}
+
+
+bool Model::load_specularmap(const std::string& filename) {
+    specularmap_loaded = load_texture(filename, specularmap_);
+    return specularmap_loaded;
+}
+
+
+bool Model::has_diffusemap() {
+    return diffusemap_loaded;
+}
+
+bool Model::has_normalmap() {
+    return normalmap_loaded;
+}
+
+bool Model::has_specularmap() {
+    return specularmap_loaded;
 }

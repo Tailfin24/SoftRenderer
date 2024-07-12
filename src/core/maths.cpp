@@ -5,7 +5,42 @@ template <> template <> vec<3,float>::vec(const vec<3,int> &v)   : x(v.x),y(v.y)
 template <> template <> vec<2,int>  ::vec(const vec<2,float> &v) : x(int(v.x+.5f)),y(int(v.y+.5f)) {}
 template <> template <> vec<2,float>::vec(const vec<2,int> &v)   : x(v.x),y(v.y) {}
 
-/*
+Mat4f Mat::translate(Vec3f tr) {
+    Mat4f m = Mat4f::identity();
+    m[0][3] = tr[0];
+    m[1][3] = tr[1];
+    m[2][3] = tr[2];
+    return m;
+}
+
+Mat4f Mat::scale(Vec3f sc) {
+    Mat4f m = Mat4f::identity();
+    m[0][0] = sc[0];
+    m[1][1] = sc[1];
+    m[2][2] = sc[2];
+    return m;
+}
+
+Mat4f Mat::rotation(Vec4f quad) {
+    Mat4f m = Mat4f::identity();
+    float x = quad[0], y = quad[1], z = quad[2], w = quad[3];
+    m[0][0] = 1-2*y*y-2*z*z;
+    m[0][1] = 2*x*y-2*z*w;
+    m[0][2] = 2*x*z+2*y*w;
+    m[1][0] = 2*x*y+2*z*w;
+    m[1][1] = 1-2*x*x-2*z*z;
+    m[1][2] = 2*y*z-2*x*w;
+    m[2][0] = 2*x*z-2*y*w;
+    m[2][1] = 2*y*z+2*x*w;
+    m[2][2] = 1-2*x*x-2*y*y;
+    return m;
+}
+
+Mat4f Mat::model(Vec3f tr, Vec4f quad, Vec3f sc) {
+    return translate(tr)*rotation(quad)*scale(sc);
+}
+
+/**
  * viewport: 创建视口变换矩阵
  * 返回一个矩阵，将 [-1,1]^3 的空间变换为 [x, x+w]*[y,y+h]*[0,depth] 空间
  */
@@ -37,8 +72,11 @@ Mat4f Mat::lookat(Vec3f eye, Vec3f center, Vec3f up) {
         res[0][i] = x[i];
         res[1][i] = y[i];
         res[2][i] = z[i];
-        res[3][i] = -center[i];
     }
+
+    res[0][3] = -dot(x,eye);
+    res[1][3] = -dot(y,eye);
+    res[2][3] = -dot(z,eye);
     return res;
 }
 

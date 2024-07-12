@@ -43,36 +43,43 @@ void line(TGAImage& framebuffer,int x0, int y0, int x1, int y1,TGAColor color) {
  * 计算某点的重心坐标
  */
 static inline Vec3f barycentric(Vec2f A, Vec2f B, Vec2f C, Vec2f P) {
-	Vec3f s[2];
-	for (int i = 1; i >= 0; i--) {
-		s[i][0] = C[i] - A[i];
-		s[i][1] = B[i] - A[i];
-		s[i][2] = A[i] - P[i];
-	}
+    Vec3f s[2];
+    for (int i = 1; i >= 0; i--) {
+        s[i][0] = C[i] - A[i];
+        s[i][1] = B[i] - A[i];
+        s[i][2] = A[i] - P[i];
+    }
 
     Vec3f u = cross(s[0], s[1]);
-	if (std::abs(u[2]) > 1e-2)
+    if (std::abs(u[2]) > 1e-2)
         return Vec3f(1.f-(u.x+u.y)/u.z, u.y/u.z, u.x/u.z);
-	return Vec3f(-1,1,1);
+    return Vec3f(-1,1,1);
 }
 
 
 void triangle(TGAImage& framebuffer, std::vector<float>& zbuffer, Shader* shader, const std::array<Vec4f, 3>& t) {
 
     // 创建包围盒
-    Vec2f bboxmin( std::numeric_limits<float>::max(),  std::numeric_limits<float>::max());
-    Vec2f bboxmax(-std::numeric_limits<float>::max(), -std::numeric_limits<float>::max());
+    Vec2i bboxmin( framebuffer.get_width()-1,  framebuffer.get_width()-1);
+    Vec2i bboxmax(0, 0);
+
     for (int i=0; i<3; i++) {
         for (int j=0; j<2; j++) {
-            bboxmin[j] = std::min(bboxmin[j], t[i][j]/t[i][3]);
-            bboxmax[j] = std::max(bboxmax[j], t[i][j]/t[i][3]);
+            bboxmin[j] = std::min(bboxmin[j], (int)(t[i][j]/t[i][3]));
+            bboxmax[j] = std::max(bboxmax[j], (int)(t[i][j]/t[i][3]));
         }
     }
+
+    bboxmin[0] = std::max(0, bboxmin[0]);
+    bboxmin[1] = std::max(0, bboxmin[1]);
+    bboxmax[0] = std::min(framebuffer.get_width()-1, bboxmax[0]);
+    bboxmax[1] = std::min(framebuffer.get_height()-1, bboxmax[1]);
 
     // 渲染
     for (int x = bboxmin.x; x <= bboxmax.x; x++) {
         for (int y = bboxmin.y; y <= bboxmax.y; y++) {
-            if (x <= 0 || y <= 0 || x > framebuffer.get_width() || y > framebuffer.get_height()) continue;
+            // if (x < 0 || y < 0 || x >= framebuffer.get_width() || y >= framebuffer.get_height()) continue;
+
             Vec3f bary = barycentric(proj<2>(t[0]/t[0][3]), proj<2>(t[1]/t[1][3]), proj<2>(t[2]/t[2][3]), Vec2f(x,y));
             // 使用重心坐标判断是否在三角形内
             if (bary.x < 0 || bary.y < 0 || bary.z < 0) continue;

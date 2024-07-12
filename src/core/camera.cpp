@@ -1,80 +1,54 @@
 #include "camera.h"
 
-Camera::Camera() : aspect(0.75) {
+Camera::Camera() : eye(1,0,0), center(0,0,0), up(0,1,0), aspect(1.0), fov(M_PI/6), znear(-0.1), zfar(-100) {
 
 }
 
-Camera::Camera(const Vec3f &e, const Vec3f &c, const Vec3f &up, float aspect)
-    : aspect(aspect) {
-    update_view(e, c, up);
+void Camera::scale(int ratio) {
+        Vec3f form_target = eye-center;
+        float radius = form_target.norm();
+        float yaw = (float)std::atan2(form_target.x, form_target.z);
+        float pitch = (float)std::asin(form_target.y / radius);
+        Vec3f offset;
+        radius *= (float)std::pow(0.95, ratio);
+        offset.x = (radius * (float)std::cos(pitch) * (float)std::sin(yaw));
+        offset.y = (radius * (float)std::sin(pitch));
+        offset.z = (radius * (float)std::cos(pitch) * (float)std::cos(yaw));
+        eye = center + offset;
 }
 
-Camera::Camera(const Vec3f& center, float radius, float theta, float phi, float aspect)
-    : center(center), aspect(aspect), radius(radius), theta(theta), phi(phi) {
-    update_ecu();
+
+void Camera::rotate_around_target(Vec2f uv) {
+    Vec3f form_target = eye-center;
+    float radius = form_target.norm();
+    float yaw = (float)std::atan2(form_target.x, form_target.z);
+    float pitch = (float)std::asin(form_target.y / radius);
+    float factor = (float)M_PI * 2.f;
+    Vec3f offset;
+    yaw -= uv.x * factor;
+    pitch += uv.y * factor;
+
+    if(pitch + M_PI_2 < FLT_EPSILON) pitch = - 1.569051f;
+    if(pitch - M_PI_2 > FLT_EPSILON) pitch = 1.569051f;
+
+    offset.x = (radius * (float)std::cos(pitch) * (float)std::sin(yaw));
+    offset.y = (radius * (float)std::sin(pitch));
+    offset.z = (radius * (float)std::cos(pitch) * (float)std::cos(yaw));
+
+    eye = center + offset;
 }
 
-void Camera::update_view(const Vec3f &e, const Vec3f &c, const Vec3f &u) {
-    eye = e;
-    center = c;
-    up = u;
+void Camera::move_target(Vec2f uv) {
+    Vec3f from_position = center-eye;
+    Vec3f forward = (from_position).normalize();
+    Vec3f left = (cross(Vec3f(0,1,0),forward)).normalize();
+    Vec3f _up = (cross(forward,left)).normalize();
 
-    Vec3f r = eye-center;
-    radius = r.norm();
-
-    Vec2f proj_xy = Vec2f(r.x, r.y);
-    Vec2f proj_yz = Vec2f(r.y, r.z);
-
-    theta = proj_xy * Vec2f(1,0) / proj_xy.norm();
-    phi = proj_yz * Vec2f(1,0) / proj_yz.norm();
+    float dist = from_position.norm();
+    float factor = dist * (float)tan(fov / 2) * 2;
+    Vec3f dx = left * factor * aspect * uv.x;
+    Vec3f dy = _up * factor * uv.y;
+    center = center + (dx+dy);
+    eye = eye + (dx+dy);
 }
 
-void Camera::update_view(const Vec3f &c, float r, float th, float ph) {
-    center = c;
-    radius = r;
-    theta = th;
-    phi = ph;
-    update_ecu();
-}
-
-void Camera::update_ecu() {
-    eye = Vec3f(radius * cos(phi) * cos(theta), radius * sin(phi), radius * cos(phi) * sin(theta)) + center;
-    up = Vec3f(sin(phi)*cos(theta), cos(phi), sin(phi)*sin(theta));
-}
-
-void Camera::scale(float scale) {
-    radius *= scale;
-    eye = (eye-center)*scale+center;
-}
-
-void Camera::rotate_horizontal(float angle) {
-    theta += angle;
-    update_ecu();
-}
-
-void Camera::rotate_vertical(float angle) {
-    phi += angle;
-    update_ecu();
-}
-
-void Camera::translate_xyz(int dx, int dy, int dz) {
-    center = center + Vec3f(dx, dy, dz);
-    update_ecu();
-}
-
-void Camera::translate_xyz(const Vec3f &xyz) {
-    center = center + xyz;
-    update_ecu();
-}
-
-Vec3f Camera::get_eye() {
-    return eye;
-}
-
-Vec3f Camera::get_center() {
-    return center;
-}
-
-Vec3f Camera::get_up() {
-    return up;
-}

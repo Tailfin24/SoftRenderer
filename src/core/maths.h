@@ -2,13 +2,12 @@
 #define MATHS_H
 
 #include <cmath>
+#include <cfloat>
 #include <vector>
 #include <array>
 #include <cassert>
 #include <iostream>
 
-const int PI = 3.1415926;
-const float EPS = 1e-5f;
 
 template<size_t DimCols,size_t DimRows,typename T> class mat;
 
@@ -85,6 +84,14 @@ template<size_t LEN,size_t DIM, typename T> vec<LEN,T> proj(const vec<DIM,T> &v)
     vec<LEN,T> ret;
     for (size_t i=LEN; i--; ret[i]=v[i]);
     return ret;
+}
+
+template <typename T> T dot(vec<2,T> v1, vec<2,T> v2) {
+    return v1.x*v2.x+v1.y*v2.y;
+}
+
+template <typename T> T dot(vec<3,T> v1, vec<3,T> v2) {
+    return v1.x*v2.x+v1.y*v2.y+v1.z*v2.z;
 }
 
 template <typename T> vec<3,T> cross(vec<3,T> v1, vec<3,T> v2) {
@@ -217,6 +224,10 @@ typedef mat<4,4,float> Mat4f;
 
 // Transformations
 namespace Mat {
+Mat4f translate(Vec3f tr);
+Mat4f scale(Vec3f sc);
+Mat4f rotation(Vec4f quad);
+Mat4f model(Vec3f tr, Vec4f quad, Vec3f scale);
 Mat4f viewport(int x, int y, int w, int h);
 Mat4f lookat(Vec3f pos, Vec3f focal, Vec3f up);
 Mat4f projection(float fov, float aspect, float znear, float zfar);

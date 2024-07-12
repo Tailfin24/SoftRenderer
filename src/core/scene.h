@@ -10,25 +10,28 @@ class Scene {
 protected:
     Shader* shader;
     std::vector<Model*> models;
-    TGAImage framebuffer;
     int w, h;
     std::vector<float> zbuffer;
     Camera camera;
-    Vec3f light_dir;
+    // Vec3f light_dir;
+    Light light;
 public:
-    Scene(int width, int height, const std::string& scene_name = "african_head");
+    TGAImage framebuffer;
+    Scene(int width, int height);
     ~Scene();
-    void load_scene(const std::string& scene_name);
+    bool add_model(const std::string& obj_path);
+    bool add_diffusemap(const std::string& path);
+    bool add_normalmap(const std::string& path);
+    bool add_specularmap(const std::string& path);
+    void clear();
+
     void rasterize();
-    TGAImage get_framebuffer();
-    TGAImage get_zbuffer();
+    int width() { return w; }
+    int height() { return h; }
 
-    void camera_translate(const Vec3f& xyz);
-    void camera_translate(float x, float y, float z);
-    void camera_scale(float scale);
-    void camera_rotate_vertical(float phi);
-    void camera_rotate_horizontal(float theta);
-
+    void camera_rotate_around_target(Vec2f uv);
+    void camera_move_target(Vec2f uv);
+    void camera_scale(int ratio);
     void update_light_dir();
 
     void clear_framebuffer();

@@ -1,24 +1,35 @@
 #include "./scene.h"
 
-Scene::Scene(int width, int height, const std::string& scene_name)
-    :  w(width), h(height), zbuffer(width*height), camera(Vec3f(0,0,0), std::sqrt(10), 0.7f, 0.6f, 4.f/3.f)
+Scene::Scene(int width, int height)
+    :  w(width), h(height), zbuffer(width*height)
 {
-    // 加载模型
-    load_scene(scene_name);
-    // 创建着色器
-    shader = new GouraudShader();
 
+    // 设置初始相机位置
+    camera.eye = Vec3f(0.f, 0.f, 3.5f);
+    camera.center = Vec3f(0.0f, 0.0f, 0.0f);
+    camera.up = Vec3f(0.0f, 1.0f, 0.0f);
+
+    // 创建着色器
+    shader = new PhongShader();
+
+    // 初始化光照
+    light.light_dir = Vec3f(1,1,1).normalize();
+    light.ambient = Vec3f(0.1, 0.1, 0.1);
+    light.diffuse = Vec3f(1.0, 1.0, 1.0);
+    light.specular = Vec3f(1.0, 1.0, 1.0);
+    shader->payload.uniform_light = light;
 
     // 初始化着色器
-    light_dir = Vec3f(1,1,1).normalize();
-    Mat4f proj = Mat::projection(-1.f/(camera.get_eye()-camera.get_center()).norm());
-    Mat4f view = Mat::lookat(camera.get_eye(), camera.get_center(), camera.get_up());
+
+    Mat4f proj = Mat::projection(camera.fov, camera.aspect, camera.znear, camera.zfar);
+    Mat4f view = Mat::lookat(camera.eye, camera.center, camera.up);
     Mat4f viewport = Mat::viewport(width/8, height/8, width*3/4, height*3/4);
+    shader->payload.uniform_eye = camera.eye;
     shader->payload.uniform_mvp = proj*view;
-    shader->payload.uniform_mit = shader->payload.uniform_mvp.invert_transpose();
     shader->payload.uniform_viewport = viewport;
-    shader->payload.uniform_light_dir = light_dir;
-    // 创建缓冲
+    // shader->payload.uniform_light_dir = light_dir;
+
+    // 创建帧缓冲
     framebuffer = TGAImage(width, height, TGAImage::RGBA);
 }
 
@@ -29,23 +40,29 @@ Scene::~Scene() {
     }
 }
 
-void Scene::load_scene(const std::string& scene_name) {
-    if (scene_name == "african_head") {
-        models.push_back(new Model(".\\obj\\african_head\\african_head.obj"));
-        models.push_back(new Model(".\\obj\\african_head\\african_head_eye_inner.obj"));
-        models.push_back(new Model(".\\obj\\african_head\\african_head_eye_outer.obj"));
-    } else if (scene_name == "diablo3") {
-        models.push_back(new Model(".\\obj\\diablo3_pose\\diablo3_pose.obj"));
-    } else if (scene_name == "qiyana"){
-        models.push_back(new Model(".\\obj\\qiyana\\qiyanabody.obj"));
-        models.push_back(new Model(".\\obj\\qiyana\\qiyanaface.obj"));
-        models.push_back(new Model(".\\obj\\qiyana\\qiyanahair.obj"));
-    } else if (scene_name == "floor") {
-        models.push_back(new Model(".\\obj\\floor.obj"));
+bool Scene::add_model(const std::string &obj_path) {
+    models.push_back(new Model(obj_path.c_str()));
+    return true;
+
+}
+
+bool Scene::add_diffusemap(const std::string& path) {
+    return models.back()->load_diffusemap(path);
+}
+
+bool Scene::add_normalmap(const std::string& path) {
+    return models.back()->load_normalmap(path);
+}
+
+bool Scene::add_specularmap(const std::string& path) {
+    return models.back()->load_specularmap(path);
+}
+
+void Scene::clear() {
+    for (auto model : models) {
+        delete model;
     }
-    else {
-        std::cerr << "No such scene!";
-    }
+    models.clear();
 }
 
 void Scene::rasterize() {
@@ -69,41 +86,25 @@ void Scene::clear_framebuffer() {
 }
 
 
-TGAImage Scene::get_framebuffer() {
-    return framebuffer;
-}
-
-void Scene::camera_rotate_horizontal(float theta) {
-    camera.rotate_horizontal(theta);
+void Scene::camera_rotate_around_target(Vec2f uv) {
+    camera.rotate_around_target(uv);
     update_mvp();
 }
 
-void Scene::camera_rotate_vertical(float phi) {
-    camera.rotate_vertical(phi);
+void Scene::camera_move_target(Vec2f uv) {
+    camera.move_target(uv);
     update_mvp();
 }
 
-void Scene::camera_scale(float scale) {
-    camera.scale(scale);
-    update_mvp();
-}
-
-void Scene::camera_translate(const Vec3f &xyz) {
-    camera.translate_xyz(xyz);
-    update_mvp();
-}
-
-void Scene::camera_translate(float x, float y, float z) {
-    camera.translate_xyz(x,y,z);
+void Scene::camera_scale(int ratio) {
+    camera.scale(ratio);
     update_mvp();
 }
 
 void Scene::update_mvp() {
-    Vec3f eye = camera.get_eye();
-    Vec3f center = camera.get_center();
-    Vec3f up = camera.get_up();
-    Mat4f view = Mat::lookat(eye, center, up);
-    Mat4f proj = Mat::projection(-1.f/(camera.get_eye()-camera.get_center()).norm());
+
+    Mat4f view = Mat::lookat(camera.eye, camera.center, camera.up);
+    Mat4f proj = Mat::projection(camera.fov, camera.aspect, camera.znear, camera.zfar);
+    shader->payload.uniform_eye = camera.eye;
     shader->payload.uniform_mvp = proj*view;
-    shader->payload.uniform_mit = shader->payload.uniform_mvp.invert_transpose();
 }

@@ -17,12 +17,18 @@ private:
     TGAImage diffusemap_;
     TGAImage normalmap_;
     TGAImage specularmap_;
-    void load_texture(std::string filename, const char *suffix, TGAImage &img);
+    bool diffusemap_loaded;
+    bool normalmap_loaded;
+    bool specularmap_loaded;
+
+    bool load_texture(const std::string& filename, TGAImage &img);
 public:
     Model(const char *filename);
     ~Model();
+
     int nverts();
     int nfaces();
+
     Vec3f normal(int iface, int nthvert);
     Vec3f normal(Vec2f uv);
     Vec3f vert(int iface, int nthvert);
@@ -31,5 +37,12 @@ public:
     TGAColor diffuse(Vec2f uv);
     float specular(Vec2f uv);
     std::vector<int> face(int idx);
+
+    bool load_diffusemap(const std::string& filename);
+    bool load_normalmap(const std::string& filename);
+    bool load_specularmap(const std::string& filename);
+    bool has_diffusemap();
+    bool has_normalmap();
+    bool has_specularmap();
 };
 
