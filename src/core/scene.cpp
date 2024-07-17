@@ -13,7 +13,7 @@ Scene::Scene(int width, int height)
     shader = new PhongShader();
 
     // 初始化光照
-    light.light_dir = Vec3f(1,1,1).normalize();
+    light.light_dir = Vec3f(1,0,0).normalize();
     light.ambient = Vec3f(0.1, 0.1, 0.1);
     light.diffuse = Vec3f(1.0, 1.0, 1.0);
     light.specular = Vec3f(1.0, 1.0, 1.0);
@@ -107,4 +107,21 @@ void Scene::update_mvp() {
     Mat4f proj = Mat::projection(camera.fov, camera.aspect, camera.znear, camera.zfar);
     shader->payload.uniform_eye = camera.eye;
     shader->payload.uniform_mvp = proj*view;
+}
+
+void Scene::set_light_yaw(int ratio) {
+    float yaw = (float)ratio/180*M_PI;
+    float pitch = (float)std::asin(light.light_dir.y);
+    light.light_dir.x = (float)std::cos(yaw)*std::cos(pitch);
+    light.light_dir.z = (float)std::sin(yaw)*std::cos(pitch);
+    shader->payload.uniform_light = light;
+}
+
+void Scene::set_light_pitch(int ratio) {
+    float pitch = (float)ratio/180*M_PI;
+    float yaw = (float)std::atan2(light.light_dir.z, light.light_dir.x);
+    light.light_dir.x = (float)std::cos(yaw)*std::cos(pitch);
+    light.light_dir.z = (float)std::sin(yaw)*std::cos(pitch);
+    light.light_dir.y = (float)std::sin(pitch);
+    shader->payload.uniform_light = light;
 }

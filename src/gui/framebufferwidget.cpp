@@ -176,3 +176,11 @@ void FrameBufferWidget::loadScene(const QString &path) {
 void FrameBufferWidget::clearScene() {
     m_scene->clear();
 }
+
+void FrameBufferWidget::setLightYaw(int yaw) {
+    m_scene->set_light_yaw(yaw);
+}
+
+void FrameBufferWidget::setLightPitch(int pitch) {
+    m_scene->set_light_pitch(pitch);
+}

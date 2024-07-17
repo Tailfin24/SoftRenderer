@@ -4,6 +4,7 @@ MainWindow::MainWindow(int width, int height, QWidget *parent)
     : QMainWindow(parent) {
 
     // 标题设置
+    setFixedSize(width+210, height);
     this->setWindowTitle(QString("%1 FPS: %2").arg("SoftRenderer").arg("--"));
 
     // 帧缓冲设置
@@ -34,8 +35,13 @@ MainWindow::MainWindow(int width, int height, QWidget *parent)
 
     // 工具栏设置
     QToolBox* toolBox = new QToolBox(this);
+
+    //光源设置
     LightControlWidget* lightControl = new LightControlWidget(this);
+    connect(lightControl->m_lightYawDial, SIGNAL(valueChanged(int)), m_fb_widget, SLOT(setLightYaw(int)));
+    connect(lightControl->m_lightPitchSlider, SIGNAL(valueChanged(int)), m_fb_widget, SLOT(setLightPitch(int)));
     toolBox->addItem(lightControl, "光源控制");
+
 
     // HBOX
     QWidget* cWidget = new QWidget(this);
@@ -75,3 +81,4 @@ void MainWindow::slot_loadFile() {
 void MainWindow::slot_clear() {
     m_fb_widget->clearScene();
 }
+

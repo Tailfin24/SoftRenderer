@@ -32,7 +32,8 @@ public:
     void camera_rotate_around_target(Vec2f uv);
     void camera_move_target(Vec2f uv);
     void camera_scale(int ratio);
-    void update_light_dir();
+    void set_light_yaw(int ratio);
+    void set_light_pitch(int ratio);
 
     void clear_framebuffer();
 protected:

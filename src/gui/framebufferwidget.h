@@ -37,6 +37,8 @@ public slots:
 protected slots:
     void calcFPS();
     void processInput();
+    void setLightYaw(int yaw);
+    void setLightPitch(int pitch);
 
 protected:
     void paintEvent(QPaintEvent *event) Q_DECL_OVERRIDE;
